@@ -19,19 +19,27 @@ playerStepX = 0
 playerStepY = 0
 
 def process_events():
-    # 通过键盘控制飞机移动
-    global playerStepX, playerStepY
-    if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_RIGHT:
-            playerStepX = 2
-        elif event.key == pygame.K_LEFT:
-            playerStepX = -2
-        elif event.key == pygame.K_UP:
-            playerStepY = -2
-        elif event.key == pygame.K_DOWN:
-            playerStepY = 2
-    if event.type == pygame.KEYUP:
-        playerStepX, playerStepY = 0, 0
+    # 通过键盘控制飞机移动和发射子弹
+    global playerStepX, playerStepY, running
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            return False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT:
+                playerStepX = 2
+            elif event.key == pygame.K_LEFT:
+                playerStepX = -2
+            elif event.key == pygame.K_UP:
+                playerStepY = -2
+            elif event.key == pygame.K_DOWN:
+                playerStepY = 2
+            elif event.key == pygame.K_SPACE:
+                print('空格键被按下')
+                bullets.append(Bullet())
+        elif event.type == pygame.KEYUP:
+            playerStepX, playerStepY = 0, 0
+    return True
+
 
 def move_player():
     global  playerX, playerY
@@ -68,18 +76,36 @@ def show_enemy():
             e.step *= -1
             e.y +=60
 
+#子弹
+class Bullet():
+    def __init__(self):
+        self.img = pygame.image.load('bullet.png')
+        self.x = playerX + 16
+        self.y = playerY + 10
+        self.step = 3
+bullets = []  #保存现有的子弹
+
+#显示并移动子弹
+def show_bullets():
+    for b in bullets:
+        screen.blit(b.img, (b.x, b.y))
+        b.y -= b.step
+        if b.y < 0:
+            bullets.remove(b)
+
 #游戏主循环
 running = True
 while running:
     screen.blit(bgImg, (0,0))
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
     #计算通过键盘使飞机移动的步数
-    process_events()
+    running = process_events()
+
     screen.blit(playerImg, (playerX, playerY))
     #实现移动
     move_player()
     show_enemy()
+    show_bullets()
+
+
 
     pygame.display.update()

@@ -16,6 +16,26 @@ pygame.mixer.music.play(-1)
 #创建射中音效
 hit_sound = pygame.mixer.Sound('exp.wav')
 
+#分数
+score = 0
+# font = pygame.font.Font('freesansbold.ttf', 32)
+font = pygame.font.SysFont('kaiti', 32)
+font.set_bold(True)
+def show_score():
+    text = f"分数：{score}"
+    score_render = font.render(text, True, (255, 255, 0))
+    screen.blit(score_render, (10, 10))
+
+#游戏结束
+is_over = False
+over_font = pygame.font.SysFont('kaiti', 64)
+over_font.set_bold(True)
+def check_is_over():
+    if is_over:
+        text = "游戏结束！！！"
+        render = over_font.render(text, True, (255, 0, 0))
+        screen.blit(render, (200, 250))
+
 #玩家
 playerImg = pygame.image.load('player.png')
 #玩家坐标
@@ -78,12 +98,16 @@ for i in range(number_of_enemies):
     enemies.append(Enemy())
 
 def show_enemy():
+    global is_over
     for e in enemies:
         screen.blit(e.img, (e.x, e.y))
         e.x += e.step
         if e.x > 800 - 64 or e.x < 0:
             e.step *= -1
-            e.y +=60
+            e.y +=40
+            if e.y > 450:
+                is_over = True
+                enemies.clear()
 
 def distance(bx, by, ex, ey):
     a = bx - ex
@@ -99,12 +123,14 @@ class Bullet():
         self.step = 3
     #判断击中
     def hit(self):
+        global score
         for e in enemies:
             if distance(self.x, self.y, e.x, e.y) < 30:
                 #认为射中了
                 hit_sound.play()
                 bullets.remove(self)
                 e.reset()
+                score += 1
 bullets = []  #保存现有的子弹
 
 #显示并移动子弹
@@ -121,6 +147,7 @@ def show_bullets():
 running = True
 while running:
     screen.blit(bgImg, (0,0))
+    show_score()
     #计算通过键盘使飞机移动的步数
     running = process_events()
 
@@ -129,6 +156,7 @@ while running:
     move_player()
     show_enemy()
     show_bullets()
+    check_is_over()
 
 
 

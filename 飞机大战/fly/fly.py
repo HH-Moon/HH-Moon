@@ -10,6 +10,12 @@ icon = pygame.image.load('ufo.png')   #游戏窗口
 pygame.display.set_icon(icon)
 bgImg = pygame.image.load('bg.png')
 
+#添加背景音效
+pygame.mixer.music.load('bg.wav')
+pygame.mixer.music.play(-1)
+#创建射中音效
+hit_sound = pygame.mixer.Sound('exp.wav')
+
 #玩家
 playerImg = pygame.image.load('player.png')
 #玩家坐标
@@ -96,6 +102,7 @@ class Bullet():
         for e in enemies:
             if distance(self.x, self.y, e.x, e.y) < 30:
                 #认为射中了
+                hit_sound.play()
                 bullets.remove(self)
                 e.reset()
 bullets = []  #保存现有的子弹

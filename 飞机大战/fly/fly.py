@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 #初始化界面
 pygame.init()
@@ -34,7 +35,6 @@ def process_events():
             elif event.key == pygame.K_DOWN:
                 playerStepY = 2
             elif event.key == pygame.K_SPACE:
-                print('空格键被按下')
                 bullets.append(Bullet())
         elif event.type == pygame.KEYUP:
             playerStepX, playerStepY = 0, 0
@@ -62,8 +62,11 @@ class Enemy():
         self.img = pygame.image.load('enemy.png')
         self.x = random.randint(200, 600)
         self.y = random.randint(50, 250)
-        self.step = random.randint(1,3)
-
+        self.step = 1
+    #当被射中时 重置敌人的位置
+    def reset(self):
+        self.x = random.randint(200, 600)
+        self.y = random.randint(50, 250)
 enemies = []
 for i in range(number_of_enemies):
     enemies.append(Enemy())
@@ -76,6 +79,11 @@ def show_enemy():
             e.step *= -1
             e.y +=60
 
+def distance(bx, by, ex, ey):
+    a = bx - ex
+    b = by - ey
+    return math.sqrt(a * a + b * b)
+
 #子弹
 class Bullet():
     def __init__(self):
@@ -83,12 +91,21 @@ class Bullet():
         self.x = playerX + 16
         self.y = playerY + 10
         self.step = 3
+    #判断击中
+    def hit(self):
+        for e in enemies:
+            if distance(self.x, self.y, e.x, e.y) < 30:
+                #认为射中了
+                bullets.remove(self)
+                e.reset()
 bullets = []  #保存现有的子弹
 
 #显示并移动子弹
 def show_bullets():
     for b in bullets:
         screen.blit(b.img, (b.x, b.y))
+        b.hit()
+
         b.y -= b.step
         if b.y < 0:
             bullets.remove(b)
